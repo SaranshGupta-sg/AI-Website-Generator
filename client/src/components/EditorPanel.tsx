@@ -1,31 +1,20 @@
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 
-type ElementStyles = {
-  padding: string;
-  margin: string;
-  backgroundColor: string;
-  color: string;
-  fontSize: string;
-};
-
-type SelectedElement = {
-  tagName: string;
-  className: string;
-  text: string;
-  styles: ElementStyles;
-};
-
-type ElementUpdates = Partial<{
-  tagName: string;
-  className: string;
-  text: string;
-  styles: Partial<ElementStyles>;
-}>;
-
 interface EditorPanelProps {
-  selectedElement: SelectedElement | null;
-  onUpdate: (updates: ElementUpdates) => void; // ✅ FIX
+  selectedElement: {
+    tagName: string;
+    className: string;
+    text: string;
+    styles: {
+      padding: string;
+      margin: string;
+      backgroundColor: string;
+      color: string;
+      fontSize: string;
+    };
+  } | null;
+  onUpdate: (updates: any) => void;
   onClose: () => void;
 }
 

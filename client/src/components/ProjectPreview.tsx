@@ -1,29 +1,13 @@
-import { forwardRef, useEffect, useRef, useState } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import type { Project } from "../types";
 import { iframeScript } from "../assets/assets";
 import EditorPanel from "./EditorPanel";
-
-type ElementStyles = {
-  padding: string;
-  margin: string; 
-  backgroundColor: string;
-  color: string;
-  fontSize: string;
-};
-
-export type SelectedElement = {
-  tagName: string;
-  className: string;
-  text: string;
-  styles: ElementStyles;
-};
-
-export type ElementUpdates = Partial<{
-  tagName: string;
-  className: string;
-  text: string;
-  styles: Partial<ElementStyles>;
-}>;
 
 interface ProjectPreviewProps {
   project: Project;
@@ -42,14 +26,40 @@ const ProjectPreview = forwardRef<ProjectPreviewRef, ProjectPreviewProps>(
     ref,
   ) => {
     const iframeRef = useRef<HTMLIFrameElement>(null);
-    const [selectedElement, setSelectedElement] =
-      useState<SelectedElement | null>(null);
+    const [selectedElement, setSelectedElement] = useState<any>(null);
 
     const resolutions = {
       phone: "w-[412px]",
       tablet: "w-[768px]",
       desktop: "w-full",
     };
+
+    useImperativeHandle(ref, () => ({
+      getCode: () => {
+        const doc = iframeRef.current?.contentDocument;
+        if (!doc) return undefined;
+
+        // 1. Remove our selection class / attributes / outline from all elements;
+        doc
+          .querySelectorAll(".ai-selected-element, [data-ai-selected]")
+          .forEach((el) => {
+            el.classList.remove("ai-selected-element");
+            el.removeAttribute("data-ai-selected");
+            (el as HTMLElement).style.outline = "";
+          });
+
+        // 2. Remove injected style + script from the document
+        const previewStyle = doc.getElementById("ai-preview-style");
+        if (previewStyle) previewStyle.remove();
+
+        const previewScript = doc.getElementById("ai-preview-script");
+        if (previewScript) previewScript.remove();
+
+        // 3. Serialize clean HTML
+        const html = doc.documentElement.outerHTML;
+        return html;
+      },
+    }));
 
     useEffect(() => {
       const handleMessage = (event: MessageEvent) => {
@@ -78,12 +88,12 @@ const ProjectPreview = forwardRef<ProjectPreviewRef, ProjectPreviewProps>(
     };
 
     const injectPreview = (html: string) => {
-  if (!html) return "";
-  if (!showEditorPanel) return html;
+      if (!html) return "";
+      if (!showEditorPanel) return html;
 
-  // 🔥 ALWAYS append script (no condition)
-  return html + iframeScript;
-};
+      // 🔥 ALWAYS append script (no condition)
+      return html + iframeScript;
+    };
     return (
       <div className="relative h-full bg-gray-900 flex-1 rounded-xl overflow-hidden max-sm:ml-2">
         {project.current_code ? (
