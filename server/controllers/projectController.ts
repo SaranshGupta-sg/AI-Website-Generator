@@ -7,7 +7,7 @@ export const makeRevision = async (req: Request, res: Response) => {
   const userId = req.userId;
 
   try {
-    const { projectId } = req.params;
+    const projectId = req.params.projectId as string;
     const { message } = req.body;
 
     const user = await prisma.user.findUnique({
@@ -28,7 +28,7 @@ export const makeRevision = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Please enter a valid prompt" });
     }
 
-    const currentProject = await prisma.websiteProject.findUnique({
+    const currentProject = await prisma.websiteProject.findFirst({
       where: { id: projectId, userId },
       include: { versions: true },
     });
@@ -133,7 +133,7 @@ export const makeRevision = async (req: Request, res: Response) => {
 
     await prisma.conversation.create({
       data: {
-        role: "assistant,",
+        role: "assistant",
         content:
           "I've made the changes to your website! You can now preview it",
         projectId,
@@ -170,7 +170,8 @@ export const rollbackToVersion = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const { projectId, versionId } = req.params;
+    const projectId = req.params.projectId as string;
+    const versionId = req.params.versionId as string;
 
     const project = await prisma.websiteProject.findUnique({
       where: { id: projectId, userId },
@@ -217,7 +218,7 @@ export const rollbackToVersion = async (req: Request, res: Response) => {
 export const deleteProject = async (req: Request, res: Response) => {
   try {
     const userId = req.userId;
-    const { projectId } = req.params;
+    const projectId = req.params.projectId as string;
 
     await prisma.websiteProject.delete({
       where: { id: projectId, userId },
@@ -234,13 +235,13 @@ export const deleteProject = async (req: Request, res: Response) => {
 export const getProjectPreview = async (req: Request, res: Response) => {
   try {
     const userId = req.userId;
-    const { projectId } = req.params;
+    const projectId = req.params.projectId as string;
 
     if (!userId) {
       res.status(401).json({ message: "Unauthorized" });
     }
 
-    const project = await prisma.websiteProject.delete({
+    const project = await prisma.websiteProject.findFirst({
       where: { id: projectId, userId },
       include: { versions: true },
     });
@@ -274,7 +275,7 @@ export const getPublishedProjects = async (req: Request, res: Response) => {
 // Get published projects
 export const getProjectById = async (req: Request, res: Response) => {
   try {
-    const { projectId } = req.params;
+    const projectId = req.params.projectId as string;
 
     const project = await prisma.websiteProject.findFirst({
       where: { id: projectId },
@@ -295,7 +296,7 @@ export const getProjectById = async (req: Request, res: Response) => {
 export const saveProjectCode = async (req: Request, res: Response) => {
   try {
     const userId = req.userId;
-    const { projectId } = req.params;
+    const projectId = req.params.projectId as string;
     const { code } = req.body;
 
     if (!userId) {
