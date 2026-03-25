@@ -34,7 +34,7 @@ export const createUserProject = async (req: Request, res: Response) => {
       where: { id: userId },
     });
 
-    if (user && user.credits < 5) {
+    if (user && user.credits < 1) {
       return res
         .status(403)
         .json({ message: "Add credits to create more projects" });
@@ -68,8 +68,10 @@ export const createUserProject = async (req: Request, res: Response) => {
 
     await prisma.user.update({
       where: { id: userId },
-      data: { credits: { decrement: 5 } },
+      data: { credits: { decrement: 1 } },
     });
+
+    res.json({ projectId: project.id });
 
     // Enhance user prompt
     const promptEnhanceResponse = await openai.chat.completions.create({
@@ -186,12 +188,10 @@ export const createUserProject = async (req: Request, res: Response) => {
         current_version_index: version.id,
       },
     });
-
-    res.json({ projectId: project.id });
   } catch (error: any) {
     await prisma.user.update({
       where: { id: userId },
-      data: { credits: { increment: 5 } },
+      data: { credits: { increment: 1 } },
     });
     console.log(error);
     res.status(500).json({ message: error.message });
@@ -206,7 +206,7 @@ export const getUserProject = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const { projectId } = req.params;
+    const projectId = req.params.projectId as string;
 
     const project = await prisma.websiteProject.findUnique({
       where: { id: projectId, userId },
@@ -253,7 +253,7 @@ export const togglePublish = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const { projectId } = req.params;
+    const projectId = req.params.projectId as string;
 
     const project = await prisma.websiteProject.findUnique({
       where: { id: projectId, userId },
@@ -278,6 +278,3 @@ export const togglePublish = async (req: Request, res: Response) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-// Controller Function to Purchase Credits
-export const purchaseCredits = async (req: Request, res: Response) => {};

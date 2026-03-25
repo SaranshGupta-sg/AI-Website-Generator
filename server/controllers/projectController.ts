@@ -28,7 +28,7 @@ export const makeRevision = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Please enter a valid prompt" });
     }
 
-    const currentProject = await prisma.websiteProject.findFirst({
+    const currentProject = await prisma.websiteProject.findUnique({
       where: { id: projectId, userId },
       include: { versions: true },
     });
@@ -272,7 +272,7 @@ export const getPublishedProjects = async (req: Request, res: Response) => {
   }
 };
 
-// Get published projects
+// Get a single project by id
 export const getProjectById = async (req: Request, res: Response) => {
   try {
     const projectId = req.params.projectId as string;
