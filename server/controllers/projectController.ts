@@ -18,7 +18,7 @@ export const makeRevision = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    if (user.credits < 5) {
+    if (user.credits < 1) {
       return res
         .status(403)
         .json({ message: "Add more credits to make changes" });
@@ -47,7 +47,7 @@ export const makeRevision = async (req: Request, res: Response) => {
 
     await prisma.user.update({
       where: { id: userId },
-      data: { credits: { decrement: 5 } },
+      data: { credits: { decrement: 1 } },
     });
 
     // Enhance user prompt
@@ -155,7 +155,7 @@ export const makeRevision = async (req: Request, res: Response) => {
   } catch (error: any) {
     await prisma.user.update({
       where: { id: userId },
-      data: { credits: { increment: 5 } },
+      data: { credits: { increment: 1 } },
     });
     console.log(error.code || error.message);
     res.status(500).json({ message: error.message });
