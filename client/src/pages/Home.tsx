@@ -25,7 +25,6 @@ const Home = () => {
         initial_prompt: input,
       });
       setLoading(false);
-      console.log("Before navigate", data.projectId);
       navigate(`/projects/${data.projectId}`);
     } catch (error: any) {
       setLoading(false);
