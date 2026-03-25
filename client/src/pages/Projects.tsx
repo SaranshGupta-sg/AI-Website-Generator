@@ -52,6 +52,24 @@ const Projects = () => {
     }
   };
 
+  const saveProject = async () => {
+    if (!previewRef.current) return;
+    const code = previewRef.current.getCode();
+    if (!code) return;
+    setIsSaving(true);
+    try {
+      const { data } = await api.put(`/api/project/save/${projectId}`, {
+        code,
+      });
+      toast.success(data.message);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || error.message);
+      console.log(error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   // download code ( index.html )
   const downloadCode = () => {
     const code = previewRef.current?.getCode() || project?.current_code;
@@ -67,6 +85,19 @@ const Projects = () => {
     element.download = "index.html";
     document.body.appendChild(element);
     element.click();
+  };
+
+  const togglePublish = async () => {
+    try {
+      const { data } = await api.get(`/api/user/publish-toggle/${projectId}`);
+      toast.success(data.message);
+      setProject((prev) =>
+        prev ? { ...prev, isPublished: !prev.isPublished } : null,
+      );
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || error.message);
+      console.log(error);
+    }
   };
 
   useEffect(() => {
@@ -152,6 +183,7 @@ const Projects = () => {
         {/* right */}
         <div className="flex items-center justify-end gap-3 flex-1 text-xs sm:text-sm">
           <button
+            onClick={saveProject}
             disabled={isSaving}
             className="max-sm:hidden bg-gray-800 hover:bg-gray-700 text-white px-3.5 py-1 flex items-center gap-2 rounded sm:rounded-sm transition-colors border border-gray-700"
           >
@@ -175,7 +207,10 @@ const Projects = () => {
           >
             <ArrowBigDownDashIcon size={16} /> Download
           </button>
-          <button className="bg-linear-to-br from-indigo-700 to-indigo-600 hover:from-indigo-600 hover:to-indigo-500 text-white px-3.5 py-1 flex items-center gap-2 rounded sm:rounded-sm transition-colors">
+          <button
+            onClick={togglePublish}
+            className="bg-linear-to-br from-indigo-700 to-indigo-600 hover:from-indigo-600 hover:to-indigo-500 text-white px-3.5 py-1 flex items-center gap-2 rounded sm:rounded-sm transition-colors"
+          >
             {project.isPublished ? (
               <EyeOffIcon size={16} />
             ) : (
