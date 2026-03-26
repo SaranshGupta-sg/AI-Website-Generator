@@ -348,10 +348,11 @@ export const purchaseCredits = async (req: Request, res: Response) => {
       mode: "payment",
       metadata: {
         transactionId: transaction.id,
-        appId: "site-builder",
+        appId: "ai-site-builder",
       },
       expires_at: Math.floor(Date.now() / 1000) + 30 * 60, // Expires in 30 minutes
     });
+    console.log("🔥 Purchase API HIT");
     res.json({ payment_link: session.url });
   } catch (error: any) {
     console.log(error.code || error.message);

@@ -16,10 +16,10 @@ const corsOption = {
 
 // Middleware
 app.use(cors(corsOption));
+app.post('/api/stripe', express.raw({type: 'application/json'}), stripeWebhook)
 app.all("/api/auth/{*any}", toNodeHandler(auth));
 app.use(express.json({ limit: "50mb" }));
 
-app.post('/api/stripe', express.raw({type: 'application/json'}), stripeWebhook)
 
 const port = process.env.PORT || 3000;
 
